@@ -1,0 +1,65 @@
+MODEL:
+  META_ARCHITECTURE: "RTKNet"
+  # ImageNet pretrained RTFormer backbone weights
+  WEIGHTS: "https://drive.google.com/file/d/1W_axRYN1UP7uLshDmQVBQvAcOIPzDyIV/view?usp=sharing"
+  PIXEL_MEAN: [ 123.675, 116.280, 103.530 ]
+  PIXEL_STD: [ 58.395, 57.120, 57.375 ]
+  BACKBONE:
+    FREEZE_AT: 0
+    NAME: "build_rt_former_backbone"
+  RT_FORMER_BACKBONE:
+    VARIANT: "base"
+    NORM: "SyncBN"
+  FEATURE_MAP_GENERATOR:
+    NAME: "RTFormerHead"
+    INIT_FUNC: "rtknet.layers.weight_init.kaiming_init"
+  RT_FORMER_HEAD:
+    NORM: "SyncBN"
+  SEM_SEG_HEAD:
+    NAME: "RTKNetHead"
+    NUM_CLASSES: 19
+    NORM: "SyncBN"
+    NUM_KERNEL_UPDATE_HEADS: 4
+  TEST:
+    OVERLAP_THRESHOLD: 0.6
+DATASETS:
+  TRAIN: ("cityscapes_fine_panoptic_train",)
+  TEST: ("cityscapes_fine_panoptic_val",)
+SOLVER:
+  IMS_PER_BATCH: 32
+  OPTIMIZER: "ADAMW"
+  BASE_LR: 0.0002
+  WEIGHT_DECAY: 0.05
+  BACKBONE_MULTIPLIER: 1.0
+  CLIP_GRADIENTS:
+    ENABLED: True
+    CLIP_TYPE: "full_model"
+    CLIP_VALUE: 1.0
+    NORM_TYPE: 2.0
+  LR_SCHEDULER_NAME: "WarmupPolyLR"
+  WARMUP_ITERS: 1000
+  WARMUP_FACTOR: 0.001
+  MAX_ITER: 90000
+  AMP:
+    ENABLED: True
+INPUT:
+  TRAIN_DATASET_MAPPER: "rtknet.data.PanopticDatasetMapper"
+  TEST_DATASET_MAPPER: "detectron2.data.DatasetMapper"
+  MIN_SIZE_TRAIN: !!python/object/apply:eval ["[int(x * 0.1 * 1024) for x in range(5, 21)]"]
+  MIN_SIZE_TRAIN_SAMPLING: "choice"
+  MAX_SIZE_TRAIN: 4096
+  MIN_SIZE_TEST: 1024
+  MAX_SIZE_TEST: 2048
+  CROP:
+    ENABLED: True
+    TYPE: "absolute"
+    SIZE: (512, 1024)
+  FORMAT: "RGB"
+TEST:
+  AMP:
+    ENABLED: True
+  EVAL_PERIOD: 5000
+DATALOADER:
+  FILTER_EMPTY_ANNOTATIONS: True
+  NUM_WORKERS: 8
+VERSION: 2
