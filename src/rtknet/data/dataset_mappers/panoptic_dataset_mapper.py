@@ -41,6 +41,7 @@ class PanopticDatasetMapper:
         image_format,
         ignore_label,
         size_divisibility,
+        random_flip_id_map,
     ):
         """
         NOTE: this interface is experimental.
@@ -56,6 +57,7 @@ class PanopticDatasetMapper:
         self.img_format = image_format
         self.ignore_label = ignore_label
         self.size_divisibility = size_divisibility
+        self.random_flip_id_map = random_flip_id_map
 
         logger = logging.getLogger(__name__)
         mode = "training" if is_train else "inference"
@@ -94,6 +96,7 @@ class PanopticDatasetMapper:
             "image_format": cfg.INPUT.FORMAT,
             "ignore_label": ignore_label,
             "size_divisibility": cfg.INPUT.SIZE_DIVISIBILITY,
+            "random_flip_id_map": cfg.INPUT.RANDOM_FLIP_ID_MAP,
         }
         return ret
 
@@ -154,6 +157,14 @@ class PanopticDatasetMapper:
         # Therefore it's important to use torch.Tensor.
         dataset_dict["image"] = image
 
+        # Some classes like arrows are orientation sensitive. If a horizontal flip is performed,
+        # class train ids will be swapped accordingly, e.g., left and right arrow labels swap
+        flip_train_id = False
+        if len(self.random_flip_id_map) > 0:
+            for tf in self.transforms:
+                if isinstance(tf, T.HFlipTransform):
+                    flip_train_id = True
+
         # Prepare per-category binary masks and semantic segmentation label
         pan_seg_gt = pan_seg_gt.numpy()
         sem_seg_gt = np.full_like(pan_seg_gt, fill_value=self.ignore_label)
@@ -164,6 +175,12 @@ class PanopticDatasetMapper:
             mask = pan_seg_gt == segment_info["id"]
             if np.sum(mask) > 1:
                 class_id = segment_info["category_id"]
+                if flip_train_id:
+                    for remap_id_pair in self.random_flip_id_map:
+                        if class_id == remap_id_pair[0]:
+                            class_id = remap_id_pair[1]
+                            break
+
                 if not segment_info["iscrowd"]:
                     classes.append(class_id)
                     masks.append(mask)

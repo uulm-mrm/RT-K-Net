@@ -625,15 +625,15 @@ def register_mapillary_vistas_panoptic(
 _PREDEFINED_SPLITS_ADE20K_PANOPTIC = {
     "mapillary_vistas_panoptic_train": (
         "mapillary_vistas/training/images",
-        "mapillary_vistas/training/panoptic",
-        "mapillary_vistas/training/panoptic/panoptic_2018.json",
-        "mapillary_vistas/training/labels",
+        "mapillary_vistas/training/v1.2/panoptic",
+        "mapillary_vistas/training/v1.2/panoptic/panoptic_2018.json",
+        "mapillary_vistas/training/v1.2/labels",
     ),
     "mapillary_vistas_panoptic_val": (
         "mapillary_vistas/validation/images",
-        "mapillary_vistas/validation/panoptic",
-        "mapillary_vistas/validation/panoptic/panoptic_2018.json",
-        "mapillary_vistas/validation/labels",
+        "mapillary_vistas/validation/v1.2/panoptic",
+        "mapillary_vistas/validation/v1.2/panoptic/panoptic_2018.json",
+        "mapillary_vistas/validation/v1.2/labels",
     ),
 }
 

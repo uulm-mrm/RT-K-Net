@@ -1,0 +1,11 @@
+_BASE_: "RT-K-Net-Mapillary.yaml"
+MODEL:
+  SEM_SEG_HEAD:
+    IGNORE_VALUE: 255
+    NUM_CLASSES: 116
+DATASETS:
+  TRAIN: ("mapillary_vistas_panoptic_v2_train",)
+  TEST: ("mapillary_vistas_panoptic_v2_val",)
+INPUT:
+  # Remap lane marking arrows if lr-flip is performed
+  RANDOM_FLIP_ID_MAP: [[55, 57], [57, 55], [58, 59], [59, 58]]

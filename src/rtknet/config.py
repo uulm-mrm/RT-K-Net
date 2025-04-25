@@ -22,6 +22,9 @@ def add_rtknet_config(cfg):
     # Specify dataset mappers. String needs to contain the package path as well as the class name.
     cfg.INPUT.TRAIN_DATASET_MAPPER = "detectron2.data.DatasetMapper"
     cfg.INPUT.TEST_DATASET_MAPPER = "detectron2.data.DatasetMapper"
+    # List of train id tuples which will be switched in case a lr-flip augmentation is performed,
+    # e.g., left and right arrow class ids will be switched with each other
+    cfg.INPUT.RANDOM_FLIP_ID_MAP = []
 
     # solver config
     cfg.SOLVER.OPTIMIZER = "ADAMW"
